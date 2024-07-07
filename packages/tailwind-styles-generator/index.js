@@ -4,6 +4,10 @@ import { files } from './files';
 let webContainerInstance;
 
 
+/**
+ * Installs dependencies for the Tailwind Styles Generator.
+ * @returns {Promise<number>} A promise that resolves with the exit code of the install command.
+ */
 async function installDependencies() {
 
     // Install dependencies
@@ -18,28 +22,64 @@ async function installDependencies() {
     return installProcess.exit;
 }
 
+/**
+ * Creates a container instance and performs necessary setup operations if it doesn't exist.
+ * @returns {Promise<void>} A promise that resolves when the container instance is created and setup is complete.
+ */
+async function createContainerInstance() {
 
-export async function GenerateTailwindStyles() {
+    if (!webContainerInstance) {
 
-    // Call only once
-    webContainerInstance = await WebContainer.boot();
-    await webContainerInstance.mount(files);
+        // Call only once
+        webContainerInstance = await WebContainer.boot();
+        await webContainerInstance.mount(files);
 
-    const exitCode = await installDependencies();
-    if (exitCode !== 0) {
-        throw new Error('Installation failed');
-    };
+        const exitCode = await installDependencies();
+        if (exitCode !== 0) {
+            throw new Error('Installation failed');
+        };
 
-    let output = '';
+    }
+}
+
+
+/**
+ * Generates Tailwind styles using the provided handler function.
+ *
+ * @param {Function} handler - The handler function to process the generated styles.
+ * @returns {Promise<void>} - A promise that resolves when the styles have been generated.
+ */
+async function generateTailwindStyles(handler) {
 
     const styleGeneratorProcess = await webContainerInstance.spawn('node', ['generator']);
 
-    await styleGeneratorProcess.output.pipeTo(new WritableStream({
+    styleGeneratorProcess.output.pipeTo(new WritableStream({
         write(data) {
-            output += data;
+            handler(data);
         }
     }));
 
-    return output;
-
 };
+
+/**
+ * Get the generator instance.
+ * @returns {Promise<Object>} The generator instance.
+ */
+async function GetGeneratorInstance() {
+
+    if (!webContainerInstance) {
+        await createContainerInstance();
+    }
+
+    return {
+        generateTailwindStyles
+    }
+}
+
+
+/**
+ * Get the instance of the generator.
+ *
+ * @returns {Object} The generator instance.
+ */
+export { GetGeneratorInstance };

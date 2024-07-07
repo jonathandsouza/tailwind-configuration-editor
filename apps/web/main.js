@@ -1,17 +1,21 @@
-import { GenerateTailwindStyles } from 'tailwind-styles-generator';
+import { GetGeneratorInstance } from 'tailwind-styles-generator';
 
 console.log('main app loaded...');
 
 async function compile(params) {
 
-    // const response = await fetch('http://localhost:3000');
-    // const css = await response.text();
+    const generator = await GetGeneratorInstance();
 
-    const css = await GenerateTailwindStyles();
+    window.css = '';
+    const style = document.querySelector('style');
 
-    const style = document.createElement('style');
-    style.innerHTML = css;
-    document.head.appendChild(style);
+
+    generator.generateTailwindStyles((data) => {
+        window.css += data;
+        style.innerHTML = css;
+        document.head.appendChild(style);
+        console.log(window.css);
+    });
 
 }
 

@@ -4,8 +4,13 @@
 	"description": "",
 	"main": "index.js",
 	"type": "module",
-	"scripts": {},
+	"scripts": {
+		"docs": "jsdoc -c jsdoc.conf.json"
+	},
 	"keywords": [],
 	"author": "",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"jsdoc": "^4.0.3"
+	}
 }
